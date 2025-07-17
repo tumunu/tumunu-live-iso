@@ -2,7 +2,7 @@
 
 ## Overview
 
-Complete forensic live environment for Tumunu digital forensics toolkit. Built on proven syslinux architecture following industry standards.
+Complete forensic live environment for Tumunu digital forensics toolkit.
 
 ## Architecture
 
