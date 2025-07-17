@@ -1,0 +1,84 @@
+# Tumunu Forensic Live ISO - Core Package List
+# Validated Debian Bookworm packages only
+
+# Core system
+linux-image-amd64
+live-boot
+live-config
+systemd
+systemd-sysv
+
+# Essential utilities
+bash
+coreutils
+util-linux
+procps
+nano
+less
+tree
+curl
+wget
+ca-certificates
+
+# Network and hardware support
+network-manager
+wireless-tools
+firmware-linux-free
+firmware-misc-nonfree
+pciutils
+usbutils
+hdparm
+smartmontools
+lshw
+dmidecode
+
+# Forensic tools (validated)
+sleuthkit
+dc3dd
+dcfldd
+ewf-tools
+afflib-tools
+guymager
+
+# Development tools for Tumunu
+build-essential
+cargo
+rustc
+git
+pkg-config
+libssl-dev
+
+# Filesystem support
+ntfs-3g
+exfat-fuse
+f2fs-tools
+btrfs-progs
+
+# Compression and archives
+xz-utils
+zip
+unzip
+p7zip-full
+
+# Minimal desktop environment
+xserver-xorg-core
+openbox
+pcmanfm
+lxterminal
+firefox-esr
+lightdm
+
+# System monitoring
+htop
+iotop
+dstat
+
+# Security and cryptography
+gnupg
+openssh-client
+
+# Additional forensic utilities
+hexedit
+binwalk
+foremost
+testdisk

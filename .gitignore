@@ -1,0 +1,61 @@
+# Tumunu Live ISO - Git ignore file
+
+# Build artifacts
+*.iso
+*.sha256
+*.sha512
+.build/
+auto/
+binary/
+cache/
+chroot/
+config/binary
+config/bootstrap
+config/chroot
+config/common
+config/source
+
+# Temporary files
+/tmp/
+*.tmp
+*.log
+build.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Plugin downloads
+plugins/*/download/
+plugins/*/tmp/
+
+# Rust build artifacts
+target/
+Cargo.lock
+
+# Development environment
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Security and sensitive files
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+secrets.txt
+config.json
+
+# Package manager files
+node_modules/
+*.lock

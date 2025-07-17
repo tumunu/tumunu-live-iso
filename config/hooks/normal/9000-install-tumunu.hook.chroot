@@ -1,0 +1,142 @@
+#!/bin/bash
+# Live-build hook to install Tumunu forensic imaging tool
+# Executed during chroot stage
+
+set -e
+
+echo "================================================"
+echo "TUMUNU INSTALLATION HOOK STARTING"
+echo "================================================"
+
+# Check if installation script exists
+if [ -f "/opt/tumunu/install-tumunu.sh" ]; then
+    echo "✓ Found Tumunu installation script"
+    
+    # Copy and run Tumunu installation script
+    cp /opt/tumunu/install-tumunu.sh /tmp/install-tumunu.sh
+    chmod +x /tmp/install-tumunu.sh
+    
+    echo "Running Tumunu installation..."
+    /tmp/install-tumunu.sh
+    
+    echo "✓ Tumunu installation completed"
+else
+    echo "✗ Tumunu installation script NOT FOUND at /opt/tumunu/install-tumunu.sh"
+    echo "Available files in /opt/tumunu/:"
+    ls -la /opt/tumunu/ || echo "Directory /opt/tumunu/ does not exist"
+    exit 1
+fi
+
+# Create forensic user profile
+mkdir -p /etc/skel/.config/openbox
+cat > /etc/skel/.bashrc << 'EOF'
+# Tumunu Forensic Environment Profile
+
+# Basic aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Forensic aliases
+alias mount-ro='mount -o ro'
+alias tumunu-start='tumunu'
+alias evidence-mount='mount -o ro,noexec,nosuid,nodev'
+
+# Environment variables
+export TUMUNU_HOME="/opt/tumunu"
+export TUMUNU_PLUGINS="/opt/tumunu/plugins"
+export EVIDENCE_DIR="/media/evidence"
+export PATH="$PATH:/opt/tumunu/bin"
+
+# Welcome message
+echo "Tumunu Forensic Live Environment"
+echo "================================"
+echo "Version: $(date +%Y.%m.%d)"
+echo "Tumunu: /opt/tumunu/bin/tumunu"
+echo "Evidence: /media/evidence"
+echo "Plugins: /opt/tumunu/plugins"
+echo
+echo "Available plugins:"
+ls -1 /opt/tumunu/plugins/ 2>/dev/null || echo "  No plugins found"
+echo
+EOF
+
+# Set up forensic desktop environment
+cat > /etc/skel/.config/openbox/autostart << 'EOF'
+# Tumunu Forensic Desktop Autostart
+
+# Start network manager
+nm-applet &
+
+# Show forensic status
+echo "Forensic mode: Write-blocking active" | tee /tmp/forensic-status
+EOF
+
+# Create forensic motd
+cat > /etc/motd << 'EOF'
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                        TUMUNU FORENSIC LIVE ENVIRONMENT                     ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  WARNING: This is a forensic imaging environment                            ║
+║  All storage devices are mounted read-only by default                       ║
+║  Evidence integrity is monitored and logged                                 ║
+║                                                                              ║
+║  Commands:                                                                   ║
+║    tumunu           - Start forensic imaging tool                           ║
+║    ls /media/       - List available devices                                ║
+║    mount-ro <dev>   - Mount device read-only                                ║
+║                                                                              ║
+║  Plugins:                                                                    ║
+║    vault            - Evidence encryption/decryption (.so)                  ║
+║    pricing          - Cost calculation (.so)                                ║
+║    ssd-forensic     - SSD-specific operations (GitHub)                      ║
+║    testing          - Validation and integrity (GitHub)                     ║
+║    analysis         - Evidence analysis (GitHub)                            ║
+║    verification     - Evidence verification (GitHub)                        ║
+║    audit            - Audit trail and logging (GitHub)                      ║
+║    output           - Output formatting (GitHub)                            ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+EOF
+
+# Set up forensic boot configuration
+cat > /etc/systemd/system/forensic-mode.service << 'EOF'
+[Unit]
+Description=Forensic Mode Configuration
+After=basic.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'echo "Forensic mode activated" | logger -t forensic'
+ExecStart=/bin/bash -c 'echo 1 > /proc/sys/kernel/ctrl-alt-del'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable forensic mode service
+systemctl enable forensic-mode.service
+
+# Set up write-blocking at boot
+cat > /etc/systemd/system/write-block.service << 'EOF'
+[Unit]
+Description=Enable Write Blocking for Forensic Mode
+After=basic.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'for dev in /sys/block/*/ro; do echo 1 > "$dev" 2>/dev/null || true; done'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable write-blocking service
+systemctl enable write-block.service
+
+echo "================================================"
+echo "TUMUNU INSTALLATION HOOK COMPLETED SUCCESSFULLY"
+echo "================================================"
